@@ -2,12 +2,12 @@
 '''
 Created on 13th may 2016
 @author: Daniel Durrenberger
+daniel.durrenberger@amaris.com
 
 Python 2.7.12
 Pandas 0.18.1
 Numpy 1.11.1
 Scipy 0.18.0
-
 '''
 
 import numpy as np
