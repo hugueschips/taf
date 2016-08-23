@@ -14,9 +14,6 @@ import numpy as np
 import scipy.signal
 import scipy.interpolate
 import matplotlib.pyplot as plt
-#from pylab import specgram, window_hanning, detrend_none
-import emd
-import parabolic
 
 def sticking_detection(d, startS, endS):
     sticking = (startS<=d) & (d<=endS)

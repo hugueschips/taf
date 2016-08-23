@@ -28,6 +28,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
+import scipy.io.wavfile
 import preprocessing as pp
 from pyeemd import emd_find_extrema, emd_evaluate_spline
 #plt.ion()
@@ -69,7 +70,7 @@ def plot_imfs(imfs, new_figs=True, plot_splines=False):
             plt.plot(maxx, maxy, "g^")
             plt.plot(means, "b:")
 
-def plot_emd(x, imfs, metadata='', path='../images/visu/'):
+def plot_emd(x, imfs, metadata='', path='./images/visu/'):
     # missing path creation
     if not os.path.exists(path):
         print(path+' has been created')
@@ -118,7 +119,7 @@ def plot_imf(x, signal, metadata='', title='EMD'):
         plt.savefig(path + 'last' + title + '.png')
     return fig
 
-def plot_fft(dt, abs_hht, metadata='', path='../images/visu/'):
+def plot_fft(dt, abs_hht, metadata='', path='./images/visu/'):
     # missing path creation
     if not os.path.exists(path):
         print(path+' has been created')
@@ -161,7 +162,7 @@ def yAxis(step, top):
         last = out[-1]
     return np.array(out), len(out)
 
-def plot_spectrogram(hht, fs, x, metadata='', path='../images/visu/'):
+def plot_spectrogram(hht, fs, x, metadata='', path='./images/visu/'):
     # missing path creation
     if not os.path.exists(path):
         print(path+' has been created')
@@ -195,9 +196,10 @@ def plot_spectrogram(hht, fs, x, metadata='', path='../images/visu/'):
     plt.savefig(path + 'lastSpectro.png')
     return fig
 
-def export_as_wav(filename, rate, signal):
-    import scipy.io.wavfile
+def export_as_wav(filename, rate, signal, path='./sound/'):
+    if not os.path.exists(path):
+        print(path+' has been created')
     for i in range(signal.shape[0]):
         imf = signal[i,:]
-        scipy.io.wavfile.write(filename+str(i)+'.wav', rate, imf)
+        scipy.io.wavfile.write(path+filename+str(i)+'.wav', rate, imf)
     return

@@ -167,8 +167,6 @@ def main(
         a, b, n, dt, fs = xInfo(t)
         print('          ...'+str(n)+' points...')
 
-    wav.write('coil28.wav', fs, signal)
-
     ################ Perform EMD ##############################################
     print('...perform EMD...')
     startTime = time.time()
