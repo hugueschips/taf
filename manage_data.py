@@ -284,6 +284,15 @@ def import_data(coil=28, hdfdescription='complete', data='sound'):
     store.close()
     return df
 
+def dfToArrays(df, i0=0, iN=-1):
+    i0, iN = int(i0), int(iN)
+    time = df.time.values[i0:iN]
+    signal = df.micro.values[i0:iN]
+    speed = df.speed.values[i0:iN]
+    decoiler = df.decoiler.values[i0:iN]
+    coiler = df.coiler.values[i0:iN]
+    return time, signal, speed, decoiler, coiler
+
 def xInfo(x):
     a, b = x[0], x[-1]
     n = len(x)

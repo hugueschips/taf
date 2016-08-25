@@ -30,13 +30,15 @@ def localAutoCorrelate(signal, window):
     cr = 1./(1.*n) * np.correlate(signal-m2, signal[:half]-m1, mode='valid')
     return cr[2:-2]
 
-def rolling_correlation_convolution(signal, fs, window=1):
+def rolling_correlation_convolution(signal, fs, beginning=0):
     '''
         signal is the array of amplitude of HHT of the chosen IMF
         window is the size of the window in seconds or tours
     '''
     n = len(signal)
-    window *= int(1*fs)
+    dt = 1./fs
+    window = int(1*fs)
+    t = []
     corr = []
     time_ref = 1*fs        # tour_ref if normalized
     seconds_before = 1  # tour_before if normalized
@@ -46,6 +48,7 @@ def rolling_correlation_convolution(signal, fs, window=1):
         signal_slice = signal[start:end]
         print time_ref, start, end, len(signal_slice)
         cr = localAutoCorrelate(signal_slice, window)
+        t += list(beginning + np.linspace(start*dt, end*dt, len(cr)))
         corr += list(cr)
         time_ref += (seconds_before + seconds_after) * fs
-    return corr
+    return t, corr
