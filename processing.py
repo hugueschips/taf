@@ -20,8 +20,8 @@ def window_idx(time_ref, seconds_before, seconds_after, fs):
 
 def localAutoCorrelate(signal, window):
     '''
-        computes local autocorrelation, with a bit of normalization
-        to compare results more easily
+    computes local autocorrelation, with a bit of normalization
+    to compare results more easily
     '''
     n = len(signal)
     half = (n - window)/2
@@ -32,12 +32,12 @@ def localAutoCorrelate(signal, window):
 
 def rolling_correlation_convolution(signal, fs, beginning=0):
     '''
-        signal is the array of amplitude of HHT of the chosen IMF
-        window is the size of the window in seconds or tours
-        returns two lists of lists
-            one list of time index per time window
-            one list of correlation per time window
-        you can plot them with a for loop on zip(t, corr)
+    signal is the array of amplitude of HHT of the chosen IMF
+    window is the size of the window in seconds or tours
+    returns two lists of lists
+        one list of time index per time window
+        one list of correlation per time window
+    you can plot them with a for loop on zip(t, corr)
     '''
     n = signal.shape[-1]
     dt = 1./fs
@@ -50,7 +50,7 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
     while time_ref + seconds_after*fs < n:
         start, end = window_idx(time_ref, seconds_before, seconds_after, fs)
         signal_slice = signal[start:end]
-        print time_ref, start, end, len(signal_slice)
+        #print time_ref, start, end, len(signal_slice)
         cr = localAutoCorrelate(signal_slice, window)
         t.append(list(beginning + np.linspace(start*dt, end*dt, len(cr))))
         corr.append(list(cr))
@@ -59,9 +59,9 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
 
 def fft_of_correlation(corr, fs):
     '''
-        returns two lists of lists
-            one list of frequency index per time window
-            one list of fft per time window
+    returns two lists of lists
+        one list of frequency index per time window
+        one list of fft per time window
     '''
     dt = 1./fs
     freq_list = []
@@ -77,21 +77,25 @@ def fft_of_correlation(corr, fs):
         fft_list.append( np.abs(fft[idx]) )
     return freq_list, fft_list
 
-def peak(x, y):
+def peak_coordinates(x, y):
     '''
-        returns the coordinates of the maximum of the graph (x, y) in a list
+    returns the coordinates of the maximum of the graph (x, y)
     '''
     imax = np.argmax(y)
     xmax = x[imax]
     ymax = y[imax]
-    return list([xmax, ymax])
+    return xmax, ymax
 
 def peak_list(freq_list, fft_list):
     '''
-        returns a list of lists
-            one list [xmax, ymax] per time window
+    returns two lists
+        one with the most important frequencies values per time window
+        one with the corresponding amplitudes per time window
     '''
-    peaks = []
+    xpeak = []
+    ypeak = []
     for freq, fft in zip(freq_list, fft_list):
-        peaks.append(peak(freq, fft))
+        x, y = peak_coordinates(freq, fft)
+        xpeak.append(x)
+        ypeak.append(y)
     return peaks

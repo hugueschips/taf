@@ -21,9 +21,9 @@ import processing as pc
 
 def main(
         coil=28,
-        cropTime=[90, 150],
+        cropTime=[90, 110],
         normalize=False,
-        num_imfs=2,
+        num_imfs=3,
         ):
     ############################# IMPORT COIL #################################
     print('...import coil '+str(coil)+' from hdf...')
@@ -62,10 +62,59 @@ def main(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
 
-    ############################# DIVIDE BY RMS ###############################
-    ############################# DIVIDE BY RMS ###############################
-    ############################# DIVIDE BY RMS ###############################
-    ############################# DIVIDE BY RMS ###############################
-    ############################# DIVIDE BY RMS ###############################
+    ############################# PERFORM HHT+ABS #############################
+    print('...perform HHT...')
+    startTime = time.time()
+    hht = scipy.signal.hilbert(mode)
+    imf = np.abs(hht)
+    elapsedTime = np.round(time.time()-startTime, 1)
+    print('          ...in '+str(elapsedTime)+'s... ')
 
-    return
+    ############################# AUTOCORRELATION #############################
+    print('...perform autocorrelation...')
+    startTime = time.time()
+    nimf = imf.shape[0]
+    corr_imf = []
+    for i in range(nimf):
+        print('          ...on IMF '+str(i)+'...')
+        signal = imf[i,:]
+        t, corr = pc.rolling_correlation_convolution(
+                                                    signal,
+                                                    fs,
+                                                    beginning=cropTime[0]
+                                                    )
+        corr_imf.append(corr)
+    if nimf!=len(corr_imf):
+        print 'OH OH, y a comme un souci !'
+    elapsedTime = np.round(time.time()-startTime, 1)
+    print('          ...in '+str(elapsedTime)+'s... ')
+
+    ############################# PERFORM FFT #################################
+    print('...perform FFT...')
+    startTime = time.time()
+    fft_list_imf = []
+    for imf in corr_imf:
+        freq_list, fft_list = pc.fft_of_correlation(corr, fs)
+        fft_list_imf.append(fft_list)
+    elapsedTime = np.round(time.time()-startTime, 1)
+    print('          ...in '+str(elapsedTime)+'s... ')
+
+    ############################# COMPUTE PEAKS ###############################
+    print('...compute peaks...')
+    startTime = time.time()
+    xpeak_imf = []
+    ypeak_imf = []
+    for fft_list in fft_list_imf:
+        for freq, fft in zip(freq_list, fft_list):
+            xpeak, ypeak = pc.peak_coordinates(freq, fft)
+            xpeak_imf.append(xpeak)
+            ypeak_imf.append(ypeak)
+    elapsedTime = np.round(time.time()-startTime, 1)
+    print('          ...in '+str(elapsedTime)+'s... ')
+
+    ############################# DIVIDE BY RMS ###############################
+    print xpeak_imf, ypeak_imf
+
+    return xpeak_imf, ypeak_imf
+
+main()
