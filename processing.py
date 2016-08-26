@@ -34,8 +34,12 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
     '''
         signal is the array of amplitude of HHT of the chosen IMF
         window is the size of the window in seconds or tours
+        returns two lists of lists
+            one list of time index per time window
+            one list of correlation per time window
+        you can plot them with a for loop on zip(t, corr)
     '''
-    n = len(signal)
+    n = signal.shape[-1]
     dt = 1./fs
     window = int(1*fs)
     t = []
@@ -48,7 +52,46 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
         signal_slice = signal[start:end]
         print time_ref, start, end, len(signal_slice)
         cr = localAutoCorrelate(signal_slice, window)
-        t += list(beginning + np.linspace(start*dt, end*dt, len(cr)))
-        corr += list(cr)
+        t.append(list(beginning + np.linspace(start*dt, end*dt, len(cr))))
+        corr.append(list(cr))
         time_ref += (seconds_before + seconds_after) * fs
     return t, corr
+
+def fft_of_correlation(corr, fs):
+    '''
+        returns two lists of lists
+            one list of frequency index per time window
+            one list of fft per time window
+    '''
+    dt = 1./fs
+    freq_list = []
+    fft_list = []
+    for correlation in corr:
+        fft = np.fft.fft(correlation)
+        freq = np.fft.fftfreq(len(correlation), 1./fs)
+        nTot = len(fft)
+        nPoints_to_2Hz = int(nTot*dt*2)
+        nPoints_to_10Hz = int(nTot*dt*10)
+        idx = np.arange(nPoints_to_2Hz,nPoints_to_10Hz)
+        freq_list.append( freq[idx] )
+        fft_list.append( np.abs(fft[idx]) )
+    return freq_list, fft_list
+
+def peak(x, y):
+    '''
+        returns the coordinates of the maximum of the graph (x, y) in a list
+    '''
+    imax = np.argmax(y)
+    xmax = x[imax]
+    ymax = y[imax]
+    return list([xmax, ymax])
+
+def peak_list(freq_list, fft_list):
+    '''
+        returns a list of lists
+            one list [xmax, ymax] per time window
+    '''
+    peaks = []
+    for freq, fft in zip(freq_list, fft_list):
+        peaks.append(peak(freq, fft))
+    return peaks

@@ -23,7 +23,7 @@ def main(
         coil=28,
         cropTime=[90, 150],
         normalize=False,
-        num_imfs=1,
+        num_imfs=2,
         ):
     ############################# IMPORT COIL #################################
     print('...import coil '+str(coil)+' from hdf...')
@@ -59,7 +59,7 @@ def main(
     print('...perform EMD...')
     startTime = time.time()
     mode = pyeemd.emd(signal, num_imfs=num_imfs, num_siftings=None)
-    elapsedTime = np.round(time.time()-startTime, 2)
+    elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
 
     ############################# DIVIDE BY RMS ###############################

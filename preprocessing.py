@@ -44,8 +44,8 @@ def angular_normalisation(y, d, e, kind='linear'):
 
 def angular_correspondance(d, e):
     '''
-        returns a fonction f such as
-        f(decoiler) = number of unwrapped_tour
+    returns a fonction f such as
+    f(decoiler) = number of unwrapped_tour
     '''
     d = d-np.min(d)
     r_int = 0.305                         # in m, inner radius of the decoiler
@@ -139,8 +139,8 @@ def auto_correlate(signal, std=True, mean=True):
 
 def window_idx(len_signal, window):
     '''
-        returns a list containing the window starts
-        used in get_max_freq_list
+    returns a list containing the window starts
+    used in get_max_freq_list
     '''
     windowStart = [0]
     window = min( window, len_signal )
@@ -151,8 +151,8 @@ def window_idx(len_signal, window):
 
 def get_max_freq_list(signal, dt, window):
     '''
-        returns a list with a maximum frequency peak for each window-sized
-        window of signal
+    returns a list with a maximum frequency peak for each window-sized
+    window of signal
     '''
     max_freq = []
     windowStart = window_idx(len(signal), window)
