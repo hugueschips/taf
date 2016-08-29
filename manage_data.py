@@ -9,10 +9,10 @@ Numpy 1.11.1
 Scipy 0.18.0
 '''
 
+import os
 import numpy as np
 import pandas as pd
 import scipy
-#import xlsxwriterpip
 import os.path
 import preprocessing as pp
 
@@ -291,6 +291,8 @@ def dfToArrays(df, i0=0, iN=-1):
     speed = df.speed.values[i0:iN]
     decoiler = df.decoiler.values[i0:iN]
     coiler = df.coiler.values[i0:iN]
+    coiler = coiler-coiler[0]
+    decoiler = decoiler-decoiler[-1]
     return time, signal, speed, decoiler, coiler
 
 def xInfo(x):
@@ -309,3 +311,27 @@ def write_wav(coil):
     df = md.import_data(coil)
     a, b, n, dt, fs = xInfo(df.time.values)
     scipy.io.wavfile.write(name+str(i)+'.wav', fs, df.micro.values)
+
+def store_peaks(
+                xpeak_imf,
+                ypeak_imf,
+                coil,
+                filename='peaks.h5',
+                path='./output/'
+                ):
+    if not os.path.exists(path):
+        print(path+' has been created')
+        os.makedirs(path)
+    d = {}
+    i = 0
+    for xpeak, ypeak in zip(xpeak_imf, ypeak_imf):
+        namex = 'Ximf'+str(i)
+        namey = 'Yimf'+str(i)
+        i += 1
+        d[namex] = xpeak
+        d[namey] = ypeak
+    df = pd.DataFrame(d)
+    store = pd.HDFStore(path+filename)
+    store['coil_'+str(coil)] = df
+    store.close()
+    return df, path+filename

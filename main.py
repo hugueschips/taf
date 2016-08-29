@@ -21,9 +21,10 @@ import processing as pc
 
 def main(
         coil=28,
-        cropTime=[90, 110],
+        cropTime=[90, 150],
         normalize=False,
         num_imfs=3,
+        graphics=True
         ):
     ############################# IMPORT COIL #################################
     print('...import coil '+str(coil)+' from hdf...')
@@ -33,16 +34,33 @@ def main(
     a, b, n, dt, fs = md.xInfo(t)
     print('          ...'+str(n)+' points...')
 
+    ############################# ABOUT COIL ##################################
+    sticking = dfi.sticking[coil]
+    if sticking:
+        startS, endS = dfi.startS[coil], dfi.endS[coil]
+        print '          ...', startS, endS, coiler[0], coiler[-1]
+        st, se = pp.when_sticking(coiler, t, startS, endS)
+        sti, sei = int(st), int(se)+1
+        print('...coil is sticking from '+str(sti)+' to '+str(sei)+'s...')
+        stick = ' sticking in ['+str(sti)+','+str(sei)+']'
+    else:
+        print('...no marks have been detected on this coil...')
+        stick = ' not sticking'
+    metadata = 'Coil '+str(coil)+stick
+
     ############################# DIVIDE BY RMS ###############################
     print('...divide signal by RMS on a 5s window...')
     signal /= pp.fast_rms(signal)
 
-    ############################# DIVIDE BY RMS ###############################
+    ############################# CROP TIME ZONE ##############################
+    beginning = 0 # used for autocorrelation xaxis
     if cropTime is not None:
         i0, iN = int(fs*cropTime[0]), int(fs*cropTime[1])
+        beginning = cropTime[0]  # used for autocorrelation xaxis
         print('...crop between '+str(cropTime)+'s...')
         t, signal, speed, decoiler, coiler = md.dfToArrays(df, i0, iN)
         a, b, n, dt, fs = md.xInfo(t)
+        metadata += ' cropped on '+str(cropTime)
         print('          ...'+str(n)+' points...')
 
     ############################# NORMALIZE IN TOUR SPACE #####################
@@ -81,7 +99,7 @@ def main(
         t, corr = pc.rolling_correlation_convolution(
                                                     signal,
                                                     fs,
-                                                    beginning=cropTime[0]
+                                                    beginning=beginning
                                                     )
         corr_imf.append(corr)
     if nimf!=len(corr_imf):
@@ -105,16 +123,28 @@ def main(
     xpeak_imf = []
     ypeak_imf = []
     for fft_list in fft_list_imf:
-        for freq, fft in zip(freq_list, fft_list):
-            xpeak, ypeak = pc.peak_coordinates(freq, fft)
-            xpeak_imf.append(xpeak)
-            ypeak_imf.append(ypeak)
+        xpeak, ypeak = pc.peak_list(freq_list, fft_list)
+        xpeak_imf.append(xpeak)
+        ypeak_imf.append(ypeak)
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
+    df, storeName = md.store_peaks(xpeak_imf, ypeak_imf, coil, 'peaks.h5')
 
-    ############################# DIVIDE BY RMS ###############################
-    print xpeak_imf, ypeak_imf
+    ############################# GRAPHICS ####################################
+    print('...produce graphics...')
+    startTime = time.time()
+    i = 0
+    for imf in corr_imf:
+        fig = utils.plot_autocorrelation(t, imf, fs, metadata+' imf '+str(i))
+        i += 1
+    elapsedTime = np.round(time.time()-startTime, 1)
+    print('          ...in '+str(elapsedTime)+'s... ')
+    if graphics:
+        plt.show()
 
-    return xpeak_imf, ypeak_imf
+    return xpeak_imf, ypeak_imf, storeName
 
-main()
+# for coil in range(3,12):
+#     main(coil=coil, graphics=True)
+
+#main()

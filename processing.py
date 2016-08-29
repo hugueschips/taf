@@ -98,4 +98,4 @@ def peak_list(freq_list, fft_list):
         x, y = peak_coordinates(freq, fft)
         xpeak.append(x)
         ypeak.append(y)
-    return peaks
+    return xpeak, ypeak
