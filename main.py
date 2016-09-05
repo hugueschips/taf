@@ -103,7 +103,7 @@ def main(
                                                     )
         corr_imf.append(corr)
     if nimf!=len(corr_imf):
-        print 'OH OH, y a comme un souci !'
+        print('OH OH, y a comme un souci !')
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
 
@@ -112,7 +112,7 @@ def main(
     startTime = time.time()
     fft_list_imf = []
     for imf in corr_imf:
-        freq_list, fft_list = pc.fft_of_correlation(corr, fs)
+        freq_list, fft_list = pc.fft_of_correlation(imf, fs)
         fft_list_imf.append(fft_list)
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
@@ -131,7 +131,6 @@ def main(
     df, storeName = md.store_peaks(xpeak_imf, ypeak_imf, coil, 'peaks.h5')
 
     ############################# GRAPHICS ####################################
-    print('...produce graphics...')
     startTime = time.time()
     i = 0
     for imf in corr_imf:
@@ -140,6 +139,7 @@ def main(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
     if graphics:
+        print('...produce graphics...')
         plt.show()
 
     return xpeak_imf, ypeak_imf, storeName
@@ -147,4 +147,4 @@ def main(
 # for coil in range(3,12):
 #     main(coil=coil, graphics=True)
 
-#main()
+main()
