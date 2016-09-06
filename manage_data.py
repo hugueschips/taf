@@ -315,6 +315,7 @@ def write_wav(coil):
 def store_peaks(
                 xpeak_imf,
                 ypeak_imf,
+                sticking_indicator,
                 coil,
                 filename='peaks.h5',
                 path='./output/'
@@ -330,6 +331,7 @@ def store_peaks(
         i += 1
         d[namex] = xpeak
         d[namey] = ypeak
+    d['sticking'] = sticking_indicator
     df = pd.DataFrame(d)
     store = pd.HDFStore(path+filename)
     store['coil_'+str(coil)] = df

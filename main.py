@@ -21,10 +21,10 @@ import processing as pc
 
 def main(
         coil=28,
-        cropTime=[90, 150],
+        cropTime=None, #[90, 150],
         normalize=False,
         num_imfs=3,
-        graphics=True
+        graphics=False
         ):
     ############################# IMPORT COIL #################################
     print('...import coil '+str(coil)+' from hdf...')
@@ -107,6 +107,21 @@ def main(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
 
+    ############################# STICKING INDICATOR ##########################
+    sticking_indicator = []
+    for window in t:
+        window_start = window[0]
+        window_end = window[-1]
+        if sticking:
+            window_indicator = pc.is_sticking_on_window(
+                                                    window_start, window_end,
+                                                    sti, sei
+                                                    )
+        else:
+            window_indicator = False
+        sticking_indicator.append(window_indicator)
+    print len(t)==len(sticking_indicator)
+
     ############################# PERFORM FFT #################################
     print('...perform FFT...')
     startTime = time.time()
@@ -128,7 +143,10 @@ def main(
         ypeak_imf.append(ypeak)
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
-    df, storeName = md.store_peaks(xpeak_imf, ypeak_imf, coil, 'peaks.h5')
+    df, storeName = md.store_peaks(
+                                xpeak_imf, ypeak_imf, sticking_indicator,
+                                coil, 'peaks.h5'
+                                )
 
     ############################# GRAPHICS ####################################
     startTime = time.time()
@@ -144,7 +162,4 @@ def main(
 
     return xpeak_imf, ypeak_imf, storeName
 
-# for coil in range(3,12):
-#     main(coil=coil, graphics=True)
-
-main()
+main(0)

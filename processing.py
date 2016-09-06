@@ -30,6 +30,12 @@ def localAutoCorrelate(signal, window):
     cr = 1./(1.*n) * np.correlate(signal-m2, signal[:half]-m1, mode='valid')
     return cr[2:-2]
 
+def is_sticking_on_window(
+                        window_start, window_end,
+                        sticking_start, sticking_end
+                        ):
+    return sticking_start<=window_start and window_end<=sticking_end
+
 def rolling_correlation_convolution(signal, fs, beginning=0):
     '''
     signal is the array of amplitude of HHT of the chosen IMF
