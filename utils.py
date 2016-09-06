@@ -203,3 +203,30 @@ def export_as_wav(filename, rate, signal, path='./sound/'):
         imf = signal[i,:]
         scipy.io.wavfile.write(path+filename+str(i)+'.wav', rate, imf)
     return
+
+def plot_autocorrelation(t, corr, fs, metadata='', path='./images/fft/'):
+    # missing path creation
+    if not os.path.exists(path):
+        print(path+' has been created')
+        os.makedirs(path)
+    fig = plt.figure()
+    fig.suptitle('Autocorrelated FFT on successive windows \n'+metadata)
+    for time, correlation in zip(t, corr):
+        plt.subplot(2, 1, 1)
+        plt.plot(time, correlation)
+        plt.xlabel('Time [s]')
+        plt.ylabel('Amplitude of autocorrelation')
+        plt.subplot(2, 1, 2)
+        dt = 1./fs
+        fft = np.fft.fft(correlation)
+        freq = np.fft.fftfreq(len(correlation), 1./fs)
+        nTot = fft.shape[0]
+        nPoints_to_2Hz = int(nTot*dt*2)
+        nPoints_to_10Hz = int(nTot*dt*10)
+        idx = np.arange(nPoints_to_2Hz,nPoints_to_10Hz)
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Normalized amplitude')
+        plt.savefig(path + 'FFT ' + metadata + '.png')
+        plt.savefig(path + 'last FFT.png')
+        plt.plot(freq[idx], np.abs(fft[idx]))
+    return fig
