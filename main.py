@@ -20,11 +20,11 @@ import preprocessing as pp
 import processing as pc
 
 def main(
-        coil=28,
-        cropTime=None, #[90, 150],
+        coil=8,
+        cropTime=None, #[80, 170],
         normalize=False,
         num_imfs=3,
-        graphics=False
+        graphics=True
         ):
     ############################# IMPORT COIL #################################
     print('...import coil '+str(coil)+' from hdf...')
@@ -38,7 +38,7 @@ def main(
     sticking = dfi.sticking[coil]
     if sticking:
         startS, endS = dfi.startS[coil], dfi.endS[coil]
-        print '          ...', startS, endS, coiler[0], coiler[-1]
+        #print '          ...', startS, endS, coiler[0], coiler[-1]
         st, se = pp.when_sticking(coiler, t, startS, endS)
         sti, sei = int(st), int(se)+1
         print('...coil is sticking from '+str(sti)+' to '+str(sei)+'s...')
@@ -120,7 +120,6 @@ def main(
         else:
             window_indicator = False
         sticking_indicator.append(window_indicator)
-    print len(t)==len(sticking_indicator)
 
     ############################# PERFORM FFT #################################
     print('...perform FFT...')
@@ -149,6 +148,7 @@ def main(
                                 )
 
     ############################# GRAPHICS ####################################
+    print('...produce graphics...')
     startTime = time.time()
     i = 0
     for imf in corr_imf:
@@ -157,9 +157,8 @@ def main(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
     if graphics:
-        print('...produce graphics...')
         plt.show()
 
     return xpeak_imf, ypeak_imf, storeName
 
-main(0)
+#main()
