@@ -19,12 +19,12 @@ import manage_data as md
 import preprocessing as pp
 import processing as pc
 
-def main(
+def get_peaks(
         coil=44,
         cropTime=[40, 80],
         normalize=False,
         num_imfs=3,
-        graphics=True
+        graphics=False
         ):
     ############################# IMPORT COIL #################################
     print('...import coil '+str(coil)+' from hdf...')
@@ -154,15 +154,15 @@ def main(
                                 )
 
     ############################# GRAPHICS ####################################
-    print('...produce graphics...')
-    startTime = time.time()
-    i = 0
-    for imf in corr_imf:
-        fig = utils.plot_autocorrelation(t, imf, fs, metadata+' imf '+str(i))
-        i += 1
-    elapsedTime = np.round(time.time()-startTime, 1)
-    print('          ...in '+str(elapsedTime)+'s... ')
     if graphics:
+        print('...produce graphics...')
+        startTime = time.time()
+        i = 0
+        for imf in corr_imf:
+            fig = utils.plot_autocorrelation(t, imf, fs, metadata+' imf '+str(i))
+            i += 1
+        elapsedTime = np.round(time.time()-startTime, 1)
+        print('          ...in '+str(elapsedTime)+'s... ')
         plt.show()
 
     return xpeak_imf, ypeak_imf, storeName
@@ -181,5 +181,19 @@ dict_non_sticking['10'] = {'Coil' : 10, 'Time' : [90,170]}
 dict_non_sticking['11'] = {'Coil' : 11, 'Time' : [90,170]}
 
 dictionnary = dict_non_sticking
+
+for coil in range(32,88):
+    try:
+        get_peaks(
+                coil=coil,
+                cropTime=[60,180],
+                graphics=False
+                )
+    except:
+        pass
+
 for coil in dictionnary:
-    main(coil=dictionnary[coil]['Coil'], cropTime=dictionnary[coil]['Time'])
+    get_peaks(
+            coil=dictionnary[coil]['Coil'],
+            cropTime=dictionnary[coil]['Time']
+            )
