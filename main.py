@@ -20,8 +20,8 @@ import preprocessing as pp
 import processing as pc
 
 def main(
-        coil=8,
-        cropTime=None, #[80, 170],
+        coil=44,
+        cropTime=[40, 80],
         normalize=False,
         num_imfs=3,
         graphics=True
@@ -109,6 +109,8 @@ def main(
 
     ############################# STICKING INDICATOR ##########################
     sticking_indicator = []
+    time_start = []
+    time_end = []
     for window in t:
         window_start = window[0]
         window_end = window[-1]
@@ -119,6 +121,8 @@ def main(
                                                     )
         else:
             window_indicator = False
+        time_start.append(window_start)
+        time_end.append(window_end)
         sticking_indicator.append(window_indicator)
 
     ############################# PERFORM FFT #################################
@@ -143,7 +147,9 @@ def main(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
     df, storeName = md.store_peaks(
-                                xpeak_imf, ypeak_imf, sticking_indicator,
+                                xpeak_imf, ypeak_imf,
+                                sticking_indicator,
+                                time_start, time_end,
                                 coil, 'peaks.h5'
                                 )
 
@@ -161,4 +167,19 @@ def main(
 
     return xpeak_imf, ypeak_imf, storeName
 
-#main()
+dict_sticking = {}
+dict_sticking['28'] = {'Coil' : 28, 'Time' : [90,150]}
+dict_sticking['8'] = {'Coil' : 8, 'Time' : [30,160]}
+dict_sticking['9'] = {'Coil' : 9, 'Time' : [200,280]}
+dict_sticking['44'] = {'Coil' : 44, 'Time' : [60,150]}
+
+dict_non_sticking = {}
+dict_non_sticking['1'] = {'Coil' : 1, 'Time' : [90,200]}
+dict_non_sticking['5'] = {'Coil' : 5, 'Time' : [140,190]}
+dict_non_sticking['6'] = {'Coil' : 6, 'Time' : [100,220]}
+dict_non_sticking['10'] = {'Coil' : 10, 'Time' : [90,170]}
+dict_non_sticking['11'] = {'Coil' : 11, 'Time' : [90,170]}
+
+dictionnary = dict_non_sticking
+for coil in dictionnary:
+    main(coil=dictionnary[coil]['Coil'], cropTime=dictionnary[coil]['Time'])
