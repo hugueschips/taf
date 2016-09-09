@@ -20,7 +20,7 @@ import preprocessing as pp
 import processing as pc
 
 def get_peaks(
-        coil=44,
+        coil=28,
         cropTime=[40, 80],
         normalize=False,
         num_imfs=3,
@@ -35,6 +35,7 @@ def get_peaks(
     print('          ...'+str(n)+' points...')
 
     ############################# ABOUT COIL ##################################
+    thickness = dfi.thickness[coil]
     sticking = dfi.sticking[coil]
     if sticking:
         startS, endS = dfi.startS[coil], dfi.endS[coil]
@@ -107,13 +108,21 @@ def get_peaks(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
 
-    ############################# STICKING INDICATOR ##########################
+    ############################# STICKING INDICATOR & SPEED ##################
+    av_speed = []
     sticking_indicator = []
     time_start = []
     time_end = []
     for window in t:
         window_start = window[0]
         window_end = window[-1]
+        av_speed_value = pc.average_speed_on_window(
+                                                    a,
+                                                    speed,
+                                                    window_start,
+                                                    window_end,
+                                                    fs=fs
+                                                    )
         if sticking:
             window_indicator = pc.is_sticking_on_window(
                                                     window_start, window_end,
@@ -124,6 +133,7 @@ def get_peaks(
         time_start.append(window_start)
         time_end.append(window_end)
         sticking_indicator.append(window_indicator)
+        av_speed.append(av_speed_value)
 
     ############################# PERFORM FFT #################################
     print('...perform FFT...')
@@ -147,10 +157,15 @@ def get_peaks(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
     df, storeName = md.store_peaks(
-                                xpeak_imf, ypeak_imf,
+                                xpeak_imf,
+                                ypeak_imf,
                                 sticking_indicator,
-                                time_start, time_end,
-                                coil, 'peaks.h5'
+                                time_start,
+                                time_end,
+                                coil,
+                                thickness,
+                                av_speed,
+                                'peaks.h5'
                                 )
 
     ############################# GRAPHICS ####################################
@@ -168,32 +183,34 @@ def get_peaks(
     return xpeak_imf, ypeak_imf, storeName
 
 dict_sticking = {}
-dict_sticking['28'] = {'Coil' : 28, 'Time' : [90,150]}
+#dict_sticking['28'] = {'Coil' : 28, 'Time' : [90,150]}
 dict_sticking['8'] = {'Coil' : 8, 'Time' : [30,160]}
 dict_sticking['9'] = {'Coil' : 9, 'Time' : [200,280]}
-dict_sticking['44'] = {'Coil' : 44, 'Time' : [60,150]}
+#dict_sticking['44'] = {'Coil' : 44, 'Time' : [60,150]}
 
 dict_non_sticking = {}
 dict_non_sticking['1'] = {'Coil' : 1, 'Time' : [90,200]}
 dict_non_sticking['5'] = {'Coil' : 5, 'Time' : [140,190]}
 dict_non_sticking['6'] = {'Coil' : 6, 'Time' : [100,220]}
-dict_non_sticking['10'] = {'Coil' : 10, 'Time' : [90,170]}
-dict_non_sticking['11'] = {'Coil' : 11, 'Time' : [90,170]}
+#dict_non_sticking['10'] = {'Coil' : 10, 'Time' : [90,170]}
+#dict_non_sticking['11'] = {'Coil' : 11, 'Time' : [90,170]}
 
 dictionnary = dict_non_sticking
 
-for coil in range(32,88):
-    try:
-        get_peaks(
-                coil=coil,
-                cropTime=[60,180],
-                graphics=False
-                )
-    except:
-        pass
+get_peaks(0)
 
-for coil in dictionnary:
-    get_peaks(
-            coil=dictionnary[coil]['Coil'],
-            cropTime=dictionnary[coil]['Time']
-            )
+# for coil in range(0,1):
+#     try:
+#         get_peaks(
+#                 coil=coil,
+#                 cropTime=[60,180],
+#                 graphics=False
+#                 )
+#     except:
+#         pass
+#
+# for coil in dictionnary:
+#     get_peaks(
+#             coil=dictionnary[coil]['Coil'],
+#             cropTime=dictionnary[coil]['Time']
+#             )

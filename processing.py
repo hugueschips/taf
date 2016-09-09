@@ -36,6 +36,27 @@ def is_sticking_on_window(
                         ):
     return sticking_start<=window_start and window_end<=sticking_end
 
+def average_speed_on_window(
+                            time_zero,
+                            speed,
+                            window_start,
+                            window_end,
+                            fs=10000
+                            ):
+    '''
+    returns average speed on given time window_end
+    speed is the complete array
+    window_start and window_end must be in seconds
+    '''
+    start = int(fs * (window_start-time_zero))
+    end = int(fs * (window_end-time_zero))
+    crop = speed[start: end]
+    av = np.mean(crop)
+    #if np.isnan(av):
+    #    print crop
+    #    av = 0.
+    return av
+
 def rolling_correlation_convolution(signal, fs, beginning=0):
     '''
     signal is the array of amplitude of HHT of the chosen IMF

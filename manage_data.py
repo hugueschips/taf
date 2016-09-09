@@ -319,6 +319,8 @@ def store_peaks(
                 time_start,
                 time_end,
                 coil,
+                thickness,
+                speed,
                 filename='peaks.h5',
                 path='./output/'
                 ):
@@ -333,9 +335,13 @@ def store_peaks(
         i += 1
         d[namex] = xpeak
         d[namey] = ypeak
+    n = len(sticking_indicator)
     d['sticking'] = sticking_indicator
     d['time_begin'] = time_start
     d['time_end'] = time_end
+    d['coil'] = coil * np.ones(n).astype(int)
+    d['thickness'] = thickness * np.ones(n)
+    d['speed'] = speed
     df = pd.DataFrame(d)
     store = pd.HDFStore(path+filename)
     store['coil_'+str(coil)] = df
