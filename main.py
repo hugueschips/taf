@@ -197,20 +197,23 @@ dict_non_sticking['6'] = {'Coil' : 6, 'Time' : [100,220]}
 
 dictionnary = dict_non_sticking
 
-get_peaks(0)
+#get_peaks(35, [60, 90])
 
-# for coil in range(0,1):
-#     try:
-#         get_peaks(
-#                 coil=coil,
-#                 cropTime=[60,180],
-#                 graphics=False
-#                 )
-#     except:
-#         pass
-#
-# for coil in dictionnary:
-#     get_peaks(
-#             coil=dictionnary[coil]['Coil'],
-#             cropTime=dictionnary[coil]['Time']
-#             )
+startTime = time.time()
+for coil in range(0,88):
+    try:
+        get_peaks(
+                coil=coil,
+                cropTime=[60,180],
+                graphics=False
+                )
+    except:
+        pass
+
+for coil in dictionnary:
+    get_peaks(
+            coil=dictionnary[coil]['Coil'],
+            cropTime=dictionnary[coil]['Time']
+            )
+totalTime = np.round((time.time()-startTime)/60., 0)
+print('TOTAL TIME : '+str(totalTime)+' min')
