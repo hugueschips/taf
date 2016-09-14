@@ -275,6 +275,13 @@ def import_dfi(hdfdescription='complete', dfi='inspection'):
     store.close()
     return dfi
 
+def export_dfi(df, hdfdescription='complete', dfi='inspection'):
+    hdf, folder = files(hdfdescription=hdfdescription, data=dfi)
+    store = pd.HDFStore(hdf)
+    store[folder] = df
+    store.close()
+    return hdf
+
 def import_data(coil=28, hdfdescription='complete', data='sound'):
     dfi = import_dfi()
     coil_number = dfi.coil_number[coil]
