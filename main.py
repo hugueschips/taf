@@ -21,7 +21,7 @@ import processing as pc
 
 def get_peaks(
         coil=28,
-        cropTime=[40, 80],
+        cropTime=[60, 180],
         normalize=False,
         num_imfs=3,
         graphics=False
@@ -37,11 +37,10 @@ def get_peaks(
     ############################# ABOUT COIL ##################################
     thickness = dfi.thickness[coil]
     sticking = dfi.sticking[coil]
+    duration = dfi.duration[coil]-5
     if sticking:
-        startS, endS = dfi.startS[coil], dfi.endS[coil]
-        #print '          ...', startS, endS, coiler[0], coiler[-1]
-        st, se = pp.when_sticking(coiler, t, startS, endS)
-        sti, sei = int(st), int(se)+1
+        sti, sei = dfi.t_begin[coil], dfi.t_end[coil]
+        cropTime = [int(sti*0.9), min(sti+120., duration)]
         print('...coil is sticking from '+str(sti)+' to '+str(sei)+'s...')
         stick = ' sticking in ['+str(sti)+','+str(sei)+']'
     else:
@@ -174,30 +173,14 @@ def get_peaks(
         startTime = time.time()
         i = 0
         for imf in corr_imf:
-            fig = utils.plot_autocorrelation(t, imf, fs, metadata+' imf '+str(i))
+            fig = utils.plot_autocorrelation(t, imf, fs,
+                                            metadata+' imf '+str(i)
+                                            )
             i += 1
         elapsedTime = np.round(time.time()-startTime, 1)
         print('          ...in '+str(elapsedTime)+'s... ')
         plt.show()
-
     return xpeak_imf, ypeak_imf, storeName
-
-dict_sticking = {}
-#dict_sticking['28'] = {'Coil' : 28, 'Time' : [90,150]}
-dict_sticking['8'] = {'Coil' : 8, 'Time' : [30,160]}
-dict_sticking['9'] = {'Coil' : 9, 'Time' : [200,280]}
-#dict_sticking['44'] = {'Coil' : 44, 'Time' : [60,150]}
-
-dict_non_sticking = {}
-dict_non_sticking['1'] = {'Coil' : 1, 'Time' : [90,200]}
-dict_non_sticking['5'] = {'Coil' : 5, 'Time' : [140,190]}
-dict_non_sticking['6'] = {'Coil' : 6, 'Time' : [100,220]}
-#dict_non_sticking['10'] = {'Coil' : 10, 'Time' : [90,170]}
-#dict_non_sticking['11'] = {'Coil' : 11, 'Time' : [90,170]}
-
-dictionnary = dict_non_sticking
-
-#get_peaks(35, [60, 90])
 
 startTime = time.time()
 for coil in range(0,88):
@@ -207,13 +190,12 @@ for coil in range(0,88):
                 cropTime=[60,180],
                 graphics=False
                 )
+        if np.mod(coil,10)==0:
+            soFarDuration = time.time()-startTime
+            estimatedTimeLeft = (88-coil)*soFarDuration/coil
+            print('                       SO FAR TIME : '+str(totalTime)+' min')
+            print('               ESTIMATED LEFT TIME : '+str(totalTime)+' min')
     except:
         pass
-
-for coil in dictionnary:
-    get_peaks(
-            coil=dictionnary[coil]['Coil'],
-            cropTime=dictionnary[coil]['Time']
-            )
-totalTime = np.round((time.time()-startTime)/60., 0)
+totalTime = time.time()-startTime
 print('TOTAL TIME : '+str(totalTime)+' min')

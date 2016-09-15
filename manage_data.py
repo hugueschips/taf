@@ -354,3 +354,9 @@ def store_peaks(
     store['coil_'+str(coil)] = df
     store.close()
     return df, path+filename
+
+def importPeak(coil=28, filename='peaks.h5', path='./output/'):
+    store = pd.HDFStore(path+filename)
+    df = store['coil_'+str(coil)]
+    store.close()
+    return df
