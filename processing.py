@@ -72,8 +72,8 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
     t = []
     corr = []
     time_ref = 1*fs        # tour_ref if normalized
-    seconds_before = 1  # tour_before if normalized
-    seconds_after = 3   # tour_after if normalized
+    seconds_before = 0  # tour_before if normalized
+    seconds_after = 0.25   # tour_after if normalized
     while time_ref + seconds_after*fs < n:
         start, end = window_idx(time_ref, seconds_before, seconds_after, fs)
         signal_slice = signal[start:end]
@@ -84,7 +84,7 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
         time_ref += (seconds_before + seconds_after) * fs
     return t, corr
 
-def fft_of_correlation(corr, fs):
+def fft_of_correlation(corr, fs, normalize=False):
     '''
     returns two lists of lists
         one list of frequency index per time window
@@ -99,6 +99,9 @@ def fft_of_correlation(corr, fs):
         nTot = len(fft)
         nPoints_to_2Hz = int(nTot*dt*2)
         nPoints_to_10Hz = int(nTot*dt*10)
+        if normalize:
+            nPoints_to_2Hz = int(nTot*dt*8)
+            nPoints_to_10Hz = int(nTot*dt*18)
         idx = np.arange(nPoints_to_2Hz,nPoints_to_10Hz)
         freq_list.append( freq[idx] )
         fft_list.append( np.abs(fft[idx]) )
