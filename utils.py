@@ -204,7 +204,14 @@ def export_as_wav(filename, rate, signal, path='./sound/'):
         scipy.io.wavfile.write(path+filename+str(i)+'.wav', rate, imf)
     return
 
-def plot_autocorrelation(t, corr, fs, metadata='', path='./images/fft/'):
+def plot_autocorrelation(
+        t,
+        corr,
+        fs,
+        normalize=False,
+        metadata='',
+        path='./images/fft/'
+        ):
     # missing path creation
     if not os.path.exists(path):
         print(path+' has been created')
@@ -223,6 +230,9 @@ def plot_autocorrelation(t, corr, fs, metadata='', path='./images/fft/'):
         nTot = fft.shape[0]
         nPoints_to_2Hz = int(nTot*dt*2)
         nPoints_to_10Hz = int(nTot*dt*10)
+        if normalize:
+            nPoints_to_2Hz = int(nTot*dt*8)
+            nPoints_to_10Hz = int(nTot*dt*13)
         idx = np.arange(nPoints_to_2Hz,nPoints_to_10Hz)
         plt.xlabel('Frequency [Hz]')
         plt.ylabel('Normalized amplitude')

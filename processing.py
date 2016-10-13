@@ -28,7 +28,7 @@ def localAutoCorrelate(signal, window):
     m1 = signal[:half].mean()
     m2 = signal.mean()
     cr = 1./(1.*n) * np.correlate(signal-m2, signal[:half]-m1, mode='valid')
-    return cr[2:-2]
+    return cr[100:-100]
 
 def is_sticking_on_window(
                         window_start, window_end,
@@ -71,9 +71,9 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
     window = int(1*fs)
     t = []
     corr = []
-    time_ref = 1*fs        # tour_ref if normalized
-    seconds_before = 0  # tour_before if normalized
-    seconds_after = 0.25   # tour_after if normalized
+    time_ref = 1*fs        # tour_ref if normalized [m]
+    seconds_before = 0  # tour_before if normalized [m]
+    seconds_after = 25   # tour_after if normalized [m]
     while time_ref + seconds_after*fs < n:
         start, end = window_idx(time_ref, seconds_before, seconds_after, fs)
         signal_slice = signal[start:end]
@@ -101,7 +101,7 @@ def fft_of_correlation(corr, fs, normalize=False):
         nPoints_to_10Hz = int(nTot*dt*10)
         if normalize:
             nPoints_to_2Hz = int(nTot*dt*8)
-            nPoints_to_10Hz = int(nTot*dt*18)
+            nPoints_to_10Hz = int(nTot*dt*13)
         idx = np.arange(nPoints_to_2Hz,nPoints_to_10Hz)
         freq_list.append( freq[idx] )
         fft_list.append( np.abs(fft[idx]) )

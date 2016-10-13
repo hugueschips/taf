@@ -302,8 +302,11 @@ def dfToArrays(df, i0=0, iN=-1):
     decoiler = decoiler-decoiler[-1]
     return time, signal, speed, decoiler, coiler
 
-def xInfo(x):
+def xInfo(x, normalize=False):
     a, b = x[0], x[-1]
+    if normalize:  # so a & b are in meters
+        a *= 100.
+        b *= 100.
     n = len(x)
     dx = (b-a)/(n-1)
     fs = int(1//dx)+1

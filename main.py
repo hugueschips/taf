@@ -22,7 +22,7 @@ import processing as pc
 def get_peaks(
         coil=28,
         cropTime=[60, 180],
-        normalize=False,
+        normalize=True,
         num_imfs=3,
         graphics=False,
         filename='peaks_new.h5'
@@ -66,12 +66,13 @@ def get_peaks(
 
     ############################# NORMALIZE IN TOUR SPACE #####################
     if normalize:
-        #print('...normalize signal in tour space...')
+        print('...normalize signal in tour space...')
         thickness = dfi.thickness[coil]
         a, b, fnorm = pp.angular_normalisation(signal, decoiler, thickness)
         t = np.linspace(a, b, n)
         signal = fnorm(t)
-        a, b, n, dt, fs = md.xInfo(t)
+        a, b, n, dt, fs = md.xInfo(t, normalize)
+        #print(a, b, n, fs)
         #print('          ...'+str(n)+' points...')
 
     ############################# PERFORM EMD #################################
@@ -82,12 +83,12 @@ def get_peaks(
     #print('          ...in '+str(elapsedTime)+'s... ')
 
     ############################# PERFORM HHT+ABS #############################
-    #print('...perform HHT...')
+    print('...perform HHT...')
     startTime = time.time()
     hht = scipy.signal.hilbert(mode)
     imf = np.abs(hht)
     elapsedTime = np.round(time.time()-startTime, 1)
-    #print('          ...in '+str(elapsedTime)+'s... ')
+    print('          ...in '+str(elapsedTime)+'s... ')
 
     ############################# AUTOCORRELATION #############################
     print('...perform autocorrelation...')
@@ -140,7 +141,11 @@ def get_peaks(
     startTime = time.time()
     fft_list_imf = []
     for imf in corr_imf:
-        freq_list, fft_list = pc.fft_of_correlation(imf, fs, normalize)
+        freq_list, fft_list = pc.fft_of_correlation(
+                                                    imf,
+                                                    fs,
+                                                    normalize=normalize
+                                                    )
         fft_list_imf.append(fft_list)
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
@@ -174,9 +179,13 @@ def get_peaks(
         startTime = time.time()
         i = 0
         for imf in corr_imf:
-            fig = utils.plot_autocorrelation(t, imf, fs,
-                                            metadata+' imf '+str(i)
-                                            )
+            fig = utils.plot_autocorrelation(
+                    t,
+                    imf,
+                    fs,
+                    normalize,
+                    metadata+' imf '+str(i)
+                    )
             i += 1
         elapsedTime = np.round(time.time()-startTime, 1)
         print('          ...in '+str(elapsedTime)+'s... ')
@@ -196,8 +205,8 @@ for coil in coil_list:
                 coil=coil,
                 cropTime=[60,180],
                 graphics=False,
-                normalize=False,
-                filename='peak_025s_slice.h5'
+                normalize=True,
+                filename='peak_new.h5'
                 )
         if np.mod(coil,2)==0:
             soFarDuration = np.round((time.time()-startTime)/60,1)
