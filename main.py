@@ -98,10 +98,10 @@ def get_peaks(
         #print('          ...on IMF '+str(i)+'...')
         signal = imf[i,:]
         t, corr = pc.rolling_correlation_convolution(
-                                                    signal,
-                                                    fs,
-                                                    beginning=beginning
-                                                    )
+            signal,
+            fs,
+            beginning=beginning
+            )
         corr_imf.append(corr)
     if nimf!=len(corr_imf):
         print('OH OH, y a comme un souci !')
@@ -117,17 +117,19 @@ def get_peaks(
         window_start = window[0]
         window_end = window[-1]
         av_speed_value = pc.average_speed_on_window(
-                                                    a,
-                                                    speed,
-                                                    window_start,
-                                                    window_end,
-                                                    fs=fs
-                                                    )
+            a,
+            speed,
+            window_start,
+            window_end,
+            fs=fs
+            )
         if sticking:
             window_indicator = pc.is_sticking_on_window(
-                                                    window_start, window_end,
-                                                    sti, sei
-                                                    )
+                window_start,
+                window_end,
+                sti,
+                sei
+                )
         else:
             window_indicator = False
         time_start.append(window_start)
@@ -157,16 +159,16 @@ def get_peaks(
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
     df, storeName = md.store_peaks(
-                                xpeak_imf,
-                                ypeak_imf,
-                                sticking_indicator,
-                                time_start,
-                                time_end,
-                                coil,
-                                thickness,
-                                av_speed,
-                                filename=filename
-                                )
+        xpeak_imf,
+        ypeak_imf,
+        sticking_indicator,
+        time_start,
+        time_end,
+        coil,
+        thickness,
+        av_speed,
+        filename=filename
+        )
 
     ############################# GRAPHICS ####################################
     if graphics:
@@ -185,7 +187,7 @@ def get_peaks(
 
 all_coils = list( set(range(88)) - set([31]) )
 startTime = time.time()
-coil_list = all_coils
+coil_list = [28]
 n = len(coil_list)
 c = 0
 for coil in coil_list:
@@ -195,11 +197,11 @@ for coil in coil_list:
         get_peaks(
                 coil=coil,
                 cropTime=[60,180],
-                graphics=False,
+                graphics=True,
                 normalize=False,
-                filename='peak_025s_slice.h5'
+                filename='peaks_new.h5'
                 )
-        if np.mod(coil,2)==0:
+        if np.mod(coil,1)==0:
             soFarDuration = np.round((time.time()-startTime)/60,1)
             estimatedTimeLeft = np.round((n*soFarDuration/c),1)
             print('             ELAPSED TIME : '+str(soFarDuration)+' min')

@@ -28,21 +28,22 @@ def localAutoCorrelate(signal, window):
     m1 = signal[:half].mean()
     m2 = signal.mean()
     cr = 1./(1.*n) * np.correlate(signal-m2, signal[:half]-m1, mode='valid')
-    return cr[2:-2]
+    #print(len(cr))
+    return cr #[50:-50]
 
 def is_sticking_on_window(
-                        window_start, window_end,
-                        sticking_start, sticking_end
-                        ):
+    window_start, window_end,
+    sticking_start, sticking_end
+    ):
     return sticking_start<=window_start and window_end<=sticking_end
 
 def average_speed_on_window(
-                            time_zero,
-                            speed,
-                            window_start,
-                            window_end,
-                            fs=10000
-                            ):
+    time_zero,
+    speed,
+    window_start,
+    window_end,
+    fs=10000
+    ):
     '''
     returns average speed on given time window_end
     speed is the complete array
@@ -57,7 +58,11 @@ def average_speed_on_window(
     #    av = 0.
     return av
 
-def rolling_correlation_convolution(signal, fs, beginning=0):
+def rolling_correlation_convolution(
+    signal,
+    fs,
+    beginning=0
+    ):
     '''
     signal is the array of amplitude of HHT of the chosen IMF
     window is the size of the window in seconds or tours
@@ -68,23 +73,28 @@ def rolling_correlation_convolution(signal, fs, beginning=0):
     '''
     n = signal.shape[-1]
     dt = 1./fs
-    window = int(1*fs)
+    window = int(0.25*fs)
     t = []
     corr = []
     time_ref = 1*fs        # tour_ref if normalized
     seconds_before = 0  # tour_before if normalized
-    seconds_after = 0.25   # tour_after if normalized
+    seconds_after = 1   # tour_after if normalized
     while time_ref + seconds_after*fs < n:
         start, end = window_idx(time_ref, seconds_before, seconds_after, fs)
         signal_slice = signal[start:end]
-        #print time_ref, start, end, len(signal_slice)
         cr = localAutoCorrelate(signal_slice, window)
-        t.append(list(beginning + np.linspace(start*dt, end*dt, len(cr))))
+        localTime = beginning + np.linspace(start*dt, end*dt, len(cr))
+        t.append(list(localTime))
         corr.append(list(cr))
-        time_ref += (seconds_before + seconds_after) * fs
+        time_ref += 1 * (seconds_before + seconds_after) * fs
     return t, corr
 
-def fft_of_correlation(corr, fs, normalize=False):
+def fft_of_correlation(
+    corr,
+    fs,
+    start_freq=1,
+    end_freq=20
+    ):
     '''
     returns two lists of lists
         one list of frequency index per time window
@@ -94,26 +104,26 @@ def fft_of_correlation(corr, fs, normalize=False):
     freq_list = []
     fft_list = []
     for correlation in corr:
-        fft = np.fft.fft(correlation)
-        freq = np.fft.fftfreq(len(correlation), 1./fs)
-        nTot = len(fft)
-        nPoints_to_2Hz = int(nTot*dt*2)
-        nPoints_to_10Hz = int(nTot*dt*10)
-        if normalize:
-            nPoints_to_2Hz = int(nTot*dt*8)
-            nPoints_to_10Hz = int(nTot*dt*18)
-        idx = np.arange(nPoints_to_2Hz,nPoints_to_10Hz)
+        nTot = len(correlation)
+        nPoints_start_freq = int( nTot*dt*start_freq )
+        nPoints_end_freq = int( nTot*dt*end_freq ) + 1
+        idx = np.arange(nPoints_start_freq, nPoints_end_freq)
+        fft = np.fft.rfft(correlation)
+        freq = np.fft.rfftfreq(nTot, dt)
         freq_list.append( freq[idx] )
         fft_list.append( np.abs(fft[idx]) )
     return freq_list, fft_list
 
-def peak_coordinates(x, y):
+def peak_coordinates(x, y, n=200):
     '''
     returns the coordinates of the maximum of the graph (x, y)
     '''
-    imax = np.argmax(y)
-    xmax = x[imax]
-    ymax = y[imax]
+    s = interpolate.InterpolatedUnivariateSpline(x, y)
+    xnew = np.arange(x[0], x[-1], n)
+    ynew = s(xnew)
+    imax = np.argmax(ynew)
+    xmax = xnew[imax]
+    ymax = ynew[imax]
     return xmax, ymax
 
 def peak_list(freq_list, fft_list):
