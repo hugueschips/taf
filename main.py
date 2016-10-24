@@ -65,8 +65,8 @@ def get_peaks(
         #print('          ...'+str(n)+' points...')
 
     ############################# NORMALIZE IN TOUR SPACE #####################
-    start_freq = 1          # no normalization
-    end_freq = 20           # used in pc.fft_of_correlation
+    start_freq = 2          # no normalization
+    end_freq = 8           # used in pc.fft_of_correlation
     slice_size = 1          # used in pc.rolling_correlation_convolution
     window_size = 0.25
     if normalize:
