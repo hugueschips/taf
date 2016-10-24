@@ -30,6 +30,7 @@ import numpy as np
 import scipy
 import scipy.io.wavfile
 import preprocessing as pp
+import processing as pc
 from pyeemd import emd_find_extrema, emd_evaluate_spline
 #plt.ion()
 
@@ -204,7 +205,7 @@ def export_as_wav(filename, rate, signal, path='./sound/'):
         scipy.io.wavfile.write(path+filename+str(i)+'.wav', rate, imf)
     return
 
-def plot_autocorrelation(
+def plot_autocorrelation_old(
     t,
     corr,
     fs,
@@ -239,4 +240,35 @@ def plot_autocorrelation(
         plt.savefig(path + 'FFT ' + metadata + '.png')
         plt.savefig(path + 'last FFT.png')
         plt.plot(freq[idx], np.abs(fft[idx]))
+    return fig
+
+def plot_autocorrelation(
+    t,
+    corr,
+    freq_list,
+    fft_list,
+    metadata='',
+    path='./images/fft/',
+    normalize=False
+    ):
+    # missing path creation
+    if not os.path.exists(path):
+        print(path+' has been created')
+        os.makedirs(path)
+    fig = plt.figure()
+    fig.suptitle('Autocorrelated FFT on successive windows \n'+metadata)
+    # create graphs
+    for time, correlation, freq, fft in zip(t, corr, freq_list, fft_list):
+        x, y = pc.interpolate_peak(freq, fft)
+        plt.subplot(2, 1, 1)
+        plt.plot(time, correlation)
+        plt.xlabel('Time [s]')
+        plt.ylabel('Amplitude of autocorrelation')
+        plt.subplot(2, 1, 2)
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Normalized amplitude')
+        plt.savefig(path + 'FFT ' + metadata + '.png')
+        plt.savefig(path + 'last FFT.png')
+        x, y = pc.interpolate_peak(freq, np.abs(fft))
+        plt.plot(x, y)
     return fig

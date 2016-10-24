@@ -11,7 +11,7 @@ Scipy 0.18.0
 '''
 
 import numpy as np
-import preprocessing as pp
+import scipy
 
 def window_idx(time_ref, seconds_before, seconds_after, fs):
     start = int(time_ref - seconds_before * fs)
@@ -29,7 +29,7 @@ def localAutoCorrelate(signal, window):
     m2 = signal.mean()
     cr = 1./(1.*n) * np.correlate(signal-m2, signal[:half]-m1, mode='valid')
     #print(len(cr))
-    return cr #[50:-50]
+    return cr[50:-50]
 
 def is_sticking_on_window(
     window_start, window_end,
@@ -61,6 +61,8 @@ def average_speed_on_window(
 def rolling_correlation_convolution(
     signal,
     fs,
+    slice_size,
+    window_size,
     beginning=0
     ):
     '''
@@ -73,12 +75,12 @@ def rolling_correlation_convolution(
     '''
     n = signal.shape[-1]
     dt = 1./fs
-    window = int(0.25*fs)
+    window = int(window_size*fs)
     t = []
     corr = []
     time_ref = 1*fs        # tour_ref if normalized
     seconds_before = 0  # tour_before if normalized
-    seconds_after = 1   # tour_after if normalized
+    seconds_after = slice_size   # tour_after if normalized
     while time_ref + seconds_after*fs < n:
         start, end = window_idx(time_ref, seconds_before, seconds_after, fs)
         signal_slice = signal[start:end]
@@ -114,13 +116,21 @@ def fft_of_correlation(
         fft_list.append( np.abs(fft[idx]) )
     return freq_list, fft_list
 
-def peak_coordinates(x, y, n=200):
+def interpolate_peak(x, y):
+    '''
+    returns (x, y) graph smoothed with splines on n points
+    '''
+    n = 5*len(x)
+    s = scipy.interpolate.InterpolatedUnivariateSpline(x, y)
+    xnew = np.linspace(x[0], x[-1], n)
+    ynew = s(xnew)
+    return xnew, ynew
+
+def peak_coordinates(x, y):
     '''
     returns the coordinates of the maximum of the graph (x, y)
     '''
-    s = interpolate.InterpolatedUnivariateSpline(x, y)
-    xnew = np.arange(x[0], x[-1], n)
-    ynew = s(xnew)
+    xnew, ynew = interpolate_peak(x, y)
     imax = np.argmax(ynew)
     xmax = xnew[imax]
     ymax = ynew[imax]

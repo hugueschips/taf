@@ -65,6 +65,10 @@ def get_peaks(
         #print('          ...'+str(n)+' points...')
 
     ############################# NORMALIZE IN TOUR SPACE #####################
+    start_freq = 1          # no normalization
+    end_freq = 20           # used in pc.fft_of_correlation
+    slice_size = 1          # used in pc.rolling_correlation_convolution
+    window_size = 0.25
     if normalize:
         #print('...normalize signal in tour space...')
         thickness = dfi.thickness[coil]
@@ -72,6 +76,10 @@ def get_peaks(
         t = np.linspace(a, b, n)
         signal = fnorm(t)
         a, b, n, dt, fs = md.xInfo(t)
+        start_freq = 10
+        end_freq = 60
+        slice_size = 0.25
+        window_size = 0.25**2
         #print('          ...'+str(n)+' points...')
 
     ############################# PERFORM EMD #################################
@@ -100,6 +108,8 @@ def get_peaks(
         t, corr = pc.rolling_correlation_convolution(
             signal,
             fs,
+            slice_size,
+            window_size,
             beginning=beginning
             )
         corr_imf.append(corr)
@@ -142,7 +152,12 @@ def get_peaks(
     startTime = time.time()
     fft_list_imf = []
     for imf in corr_imf:
-        freq_list, fft_list = pc.fft_of_correlation(imf, fs, normalize)
+        freq_list, fft_list = pc.fft_of_correlation(
+            imf,
+            fs,
+            start_freq,
+            end_freq
+            )
         fft_list_imf.append(fft_list)
     elapsedTime = np.round(time.time()-startTime, 1)
     print('          ...in '+str(elapsedTime)+'s... ')
@@ -175,10 +190,14 @@ def get_peaks(
         print('...produce graphics...')
         startTime = time.time()
         i = 0
-        for imf in corr_imf:
-            fig = utils.plot_autocorrelation(t, imf, fs,
-                                            metadata+' imf '+str(i)
-                                            )
+        for imf, fft_list in zip(corr_imf, fft_list_imf):
+            fig = utils.plot_autocorrelation(
+                t,
+                imf,
+                freq_list,
+                fft_list,
+                metadata+' imf '+str(i)
+                )
             i += 1
         elapsedTime = np.round(time.time()-startTime, 1)
         print('          ...in '+str(elapsedTime)+'s... ')
@@ -187,7 +206,7 @@ def get_peaks(
 
 all_coils = list( set(range(88)) - set([31]) )
 startTime = time.time()
-coil_list = [28]
+coil_list = all_coils
 n = len(coil_list)
 c = 0
 for coil in coil_list:
@@ -197,7 +216,7 @@ for coil in coil_list:
         get_peaks(
                 coil=coil,
                 cropTime=[60,180],
-                graphics=True,
+                graphics=False,
                 normalize=False,
                 filename='peaks_new.h5'
                 )
