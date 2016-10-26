@@ -66,7 +66,7 @@ def get_peaks(
 
     ############################# NORMALIZE IN TOUR SPACE #####################
     start_freq = 2          # no normalization
-    end_freq = 8           # used in pc.fft_of_correlation
+    end_freq = 6            # used in pc.fft_of_correlation
     slice_size = 1          # used in pc.rolling_correlation_convolution
     window_size = 0.25
     if normalize:
@@ -204,6 +204,7 @@ def get_peaks(
         plt.show()
     return xpeak_imf, ypeak_imf, storeName
 
+# DIRECT RUNNIG ZONE
 all_coils = list( set(range(88)) - set([31]) )
 startTime = time.time()
 coil_list = all_coils

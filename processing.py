@@ -120,6 +120,8 @@ def interpolate_peak(x, y):
     '''
     returns (x, y) graph smoothed with splines on n points
     '''
+    if len(x)<10:
+        return x, y
     n = 5*len(x)
     s = scipy.interpolate.InterpolatedUnivariateSpline(x, y)
     xnew = np.linspace(x[0], x[-1], n)
