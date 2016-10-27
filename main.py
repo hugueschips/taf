@@ -65,8 +65,8 @@ def get_peaks(
         #print('          ...'+str(n)+' points...')
 
     ############################# NORMALIZE IN TOUR SPACE #####################
-    start_freq = 2          # no normalization
-    end_freq = 6            # used in pc.fft_of_correlation
+    start_freq = 0          # no normalization
+    end_freq = 100            # used in pc.fft_of_correlation
     slice_size = 1          # used in pc.rolling_correlation_convolution
     window_size = 0.25
     if normalize:
@@ -76,8 +76,8 @@ def get_peaks(
         t = np.linspace(a, b, n)
         signal = fnorm(t)
         a, b, n, dt, fs = md.xInfo(t)
-        start_freq = 10
-        end_freq = 60
+        start_freq = 16
+        end_freq = 200
         slice_size = 0.25
         window_size = 0.25**2
         #print('          ...'+str(n)+' points...')
@@ -218,8 +218,8 @@ for coil in coil_list:
                 coil=coil,
                 cropTime=[60,180],
                 graphics=False,
-                normalize=False,
-                filename='peaks_new.h5'
+                normalize=True,
+                filename='peaks_0.25t_16_200.h5'
                 )
         if np.mod(coil,1)==0:
             soFarDuration = np.round((time.time()-startTime)/60,1)
@@ -230,3 +230,4 @@ for coil in coil_list:
         pass
 totalTime = int((time.time()-startTime)/60)+1
 print('TOTAL TIME : '+str(totalTime)+' min')
+print('NEW FILE : '+filename)
