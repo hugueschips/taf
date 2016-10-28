@@ -77,7 +77,7 @@ def get_peaks(
         signal = fnorm(t)
         a, b, n, dt, fs = md.xInfo(t)
         start_freq = 16
-        end_freq = 200
+        end_freq = 100
         slice_size = 0.25
         window_size = 0.25**2
         #print('          ...'+str(n)+' points...')
@@ -205,11 +205,13 @@ def get_peaks(
     return xpeak_imf, ypeak_imf, storeName
 
 # DIRECT RUNNIG ZONE
+filename='peaks_0.25t_16_100.h5'
 all_coils = list( set(range(88)) - set([31]) )
 startTime = time.time()
 coil_list = all_coils
 n = len(coil_list)
 c = 0
+fail = []
 for coil in coil_list:
     c += 1
     n -= 1
@@ -219,7 +221,7 @@ for coil in coil_list:
                 cropTime=[60,180],
                 graphics=False,
                 normalize=True,
-                filename='peaks_0.25t_16_200.h5'
+                filename=filename
                 )
         if np.mod(coil,1)==0:
             soFarDuration = np.round((time.time()-startTime)/60,1)
@@ -227,7 +229,9 @@ for coil in coil_list:
             print('             ELAPSED TIME : '+str(soFarDuration)+' min')
             print('      ESTIMATED LEFT TIME : '+str(estimatedTimeLeft)+' min')
     except:
+        fail.append(coil)
         pass
 totalTime = int((time.time()-startTime)/60)+1
 print('TOTAL TIME : '+str(totalTime)+' min')
 print('NEW FILE : '+filename)
+print('FAILS : '+str(fail))
