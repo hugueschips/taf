@@ -302,7 +302,7 @@ def dfToArrays(df, i0=0, iN=-1):
     decoiler = decoiler-decoiler[-1]
     return time, signal, speed, decoiler, coiler
 
-def xInfo(x):
+def xInfo(x, normalize=False):
     a, b = x[0], x[-1]
     n = len(x)
     dx = (b-a)/(n-1)
