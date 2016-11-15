@@ -176,4 +176,4 @@ def when_sticking(coiler, time, startS, endS):
     startS = max(coiler[0], startS*1.)
     endS = min(coiler[-1], endS*1.)
     f = scipy.interpolate.interp1d(coiler, time)
-    return f(startS), f(endS)
+    return int(f(startS)), int(f(endS)+1)
